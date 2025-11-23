@@ -1,22 +1,24 @@
 /**
- * Eckohaus Volumetric Viewer
+ * Eckohaus Volumetric Viewer — Core Dispatch
  * MIT Licence applies to software code only.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    if (!EckohausVolData || !EckohausVolData.url) return;
+    const cfg = window.EckohausVolConfig;
+    if (!cfg || !cfg.url) return;
 
-    const container = document.getElementById("eckohaus-vol-container");
-    container.innerHTML = "<p>Loading volumetric data…</p>";
-
-    fetch(EckohausVolData.url)
-        .then(response => response.json())
+    fetch(cfg.url)
+        .then(res => res.json())
         .then(data => {
-            container.innerHTML = "<p>Data loaded. 3D renderer integration coming next.</p>";
-            console.log("Volumetric data:", data);
+            if (cfg.renderer === "three") {
+                EckohausThreeRenderer.render(data);
+            } else {
+                EckohausPlotlyRenderer.render(data);
+            }
         })
         .catch(err => {
-            container.innerHTML = "<p>Error loading volumetric dataset.</p>";
-            console.error(err);
+            console.error("Viewer error:", err);
+            document.getElementById("eckohaus-vol-container").innerHTML =
+                "<p>Error loading volumetric dataset.</p>";
         });
 });
