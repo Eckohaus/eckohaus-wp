@@ -1,25 +1,32 @@
 <?php
 /**
  * Plugin Name: Eckohaus Volumetric Viewer
+ * Plugin URI: https://eckohaus.blog
  * Description: Renders 3D volumetric data exported from Eckohaus scientific repos.
  * Version: 0.1.0
  * Author: Eckohaus
+ * Author URI: https://eckohaus.co.uk
+ *
+ * Co-Author: system operator <wanda@openai.com>
+ * Co-Author: system administrator <Corvin Nehal Dhali> <info@eckohaus.co.uk>
+ *
  * License: MIT
  */
 
-// Block direct access.
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
 /**
- * Register scripts.
+ * Register plugin scripts.
+ *
+ * Using `init` ensures all scripts are registered
+ * before any shortcode attempts to enqueue them.
  */
 function eckohaus_vol_register_scripts() {
 
     $plugin_url = plugin_dir_url( __FILE__ );
 
-    // Core loader (fetches JSON, basic messaging).
     wp_register_script(
         'eckohaus-vol-core',
         $plugin_url . 'assets/js/viewer-core.js',
@@ -28,7 +35,6 @@ function eckohaus_vol_register_scripts() {
         true
     );
 
-    // Plotly renderer.
     wp_register_script(
         'eckohaus-vol-plotly',
         $plugin_url . 'assets/js/viewer-plotly.js',
@@ -37,7 +43,6 @@ function eckohaus_vol_register_scripts() {
         true
     );
 
-    // Three.js renderer (stub for now).
     wp_register_script(
         'eckohaus-vol-three',
         $plugin_url . 'assets/js/viewer-three.js',
@@ -46,13 +51,11 @@ function eckohaus_vol_register_scripts() {
         true
     );
 }
-add_action( 'wp_enqueue_scripts', 'eckohaus_vol_register_scripts' );
+add_action( 'init', 'eckohaus_vol_register_scripts' );
 
 /**
- * Shortcode handler.
- *
- * Usage:
- * [eckohaus_volume url="https://raw.githubusercontent.com/..." renderer="plotly"]
+ * Shortcode:
+ * [eckohaus_volume url="https://..." renderer="plotly"]
  */
 function eckohaus_vol_shortcode( $atts ) {
 
@@ -60,35 +63,34 @@ function eckohaus_vol_shortcode( $atts ) {
         array(
             'url'       => '',
             'renderer'  => 'plotly',
-            'container' => 'eckohaus-vol-container',
+            'container' => 'eckohaus-vol-container'
         ),
         $atts,
         'eckohaus_volume'
     );
 
-    // Always enqueue the core script.
+    // Always load core.
     wp_enqueue_script( 'eckohaus-vol-core' );
 
-    // Enqueue renderer based on attribute.
+    // Renderer selection.
     if ( $atts['renderer'] === 'three' ) {
         wp_enqueue_script( 'eckohaus-vol-three' );
     } else {
-        // Default to Plotly.
         wp_enqueue_script( 'eckohaus-vol-plotly' );
     }
 
-    // Pass data to JS.
+    // Localized JS data.
     wp_localize_script(
         'eckohaus-vol-core',
         'EckohausVolData',
         array(
             'url'       => esc_url_raw( $atts['url'] ),
-            'renderer'  => $atts['renderer'],
-            'container' => $atts['container'],
+            'renderer'  => sanitize_text_field( $atts['renderer'] ),
+            'container' => sanitize_html_class( $atts['container'] )
         )
     );
 
-    // Output viewer container.
+    // Output container.
     ob_start();
     ?>
     <div id="<?php echo esc_attr( $atts['container'] ); ?>" class="eckohaus-vol-container">
