@@ -1,10 +1,15 @@
 <?php
 /**
  * Plugin Name:       Eckohaus Volumetric Viewer
- * Description:       Volumetric JSON viewer integration for Eckohaus projects.
+ * Plugin URI:        https://eckohaus.blog
+ * Description:       Renders 3D volumetric data exported from Eckohaus scientific repos.
  * Version:           0.1.0
  * Author:            Eckohaus Ltd
+ * Author URI:        https://eckohaus.co.uk
  * Text Domain:       eckohaus-volumetric-viewer
+ *
+ * Co-Author: system operator <wanda@openai.com>
+ * Co-Author: system administrator <Corvin Nehal Dhali> <info@eckohaus.co.uk>
  *
  * @package Eckohaus_Volumetric_Viewer
  */
@@ -35,7 +40,6 @@ if ( ! defined( 'ECKOHAUS_VOL_PLUGIN_URL' ) ) {
 
 require_once ECKOHAUS_VOL_PLUGIN_DIR . 'includes/class-eckohaus-vol-assets.php';
 
-// If you already have these, keep them; if names differ, just adjust.
 if ( file_exists( ECKOHAUS_VOL_PLUGIN_DIR . 'includes/class-eckohaus-vol-fetcher.php' ) ) {
     require_once ECKOHAUS_VOL_PLUGIN_DIR . 'includes/class-eckohaus-vol-fetcher.php';
 }
@@ -54,12 +58,10 @@ if ( file_exists( ECKOHAUS_VOL_PLUGIN_DIR . 'includes/class-eckohaus-vol-shortco
 
 function eckohaus_vol_bootstrap() {
 
-    // Assets loader.
     if ( class_exists( 'Eckohaus_Vol_Assets' ) ) {
         Eckohaus_Vol_Assets::init();
     }
 
-    // If your other classes expose static init() methods, call them here:
     if ( class_exists( 'Eckohaus_Vol_Shortcode' ) && method_exists( 'Eckohaus_Vol_Shortcode', 'init' ) ) {
         Eckohaus_Vol_Shortcode::init();
     }
