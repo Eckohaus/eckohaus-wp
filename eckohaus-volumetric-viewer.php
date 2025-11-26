@@ -58,20 +58,27 @@ if ( file_exists( ECKOHAUS_VOL_PLUGIN_DIR . 'includes/class-eckohaus-vol-shortco
 
 function eckohaus_vol_bootstrap() {
 
+    // Initialise assets
     if ( class_exists( 'Eckohaus_Vol_Assets' ) ) {
         Eckohaus_Vol_Assets::init();
     }
 
-    if ( class_exists( 'Eckohaus_Vol_Shortcode' ) && method_exists( 'Eckohaus_Vol_Shortcode', 'init' ) ) {
-        Eckohaus_Vol_Shortcode::init();
+    // IMPORTANT FIX:
+    // The shortcode class uses __construct(), so it MUST be instantiated.
+    // (There is NO init() method in that class.)
+    if ( class_exists( 'Eckohaus_Vol_Shortcode' ) ) {
+        new Eckohaus_Vol_Shortcode();
     }
 
+    // Initialise optional fetcher class
     if ( class_exists( 'Eckohaus_Vol_Fetcher' ) && method_exists( 'Eckohaus_Vol_Fetcher', 'init' ) ) {
         Eckohaus_Vol_Fetcher::init();
     }
 
+    // Initialise optional renderer class
     if ( class_exists( 'Eckohaus_Vol_Renderer' ) && method_exists( 'Eckohaus_Vol_Renderer', 'init' ) ) {
         Eckohaus_Vol_Renderer::init();
     }
 }
+
 add_action( 'plugins_loaded', 'eckohaus_vol_bootstrap' );
